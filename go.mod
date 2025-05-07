@@ -1,4 +1,4 @@
-module github.com/oreshkindev/rbac-middleware
+module github.com/aaoreshkin/rbac-middleware
 
 go 1.22.4
 
