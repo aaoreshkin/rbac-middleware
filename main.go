@@ -113,26 +113,36 @@ func GetBearer(r *http.Request) (string, error) {
 }
 
 func hasPermission(userPermission interface{}, allowedPermissions []Access) bool {
-	userPermStr := toString(userPermission)
+	userPermInt, err := toInt64(userPermission)
+	if err != nil {
+		return false
+	}
+
 	for _, permission := range allowedPermissions {
-		if userPermStr == toString(permission) {
+		permInt, err := toInt64(permission)
+		if err != nil {
+			continue
+		}
+
+		// Проверка, имеет ли пользователь все необходимые права
+		if (userPermInt & permInt) == permInt {
 			return true
 		}
 	}
 	return false
 }
 
-func toString(v interface{}) string {
+func toInt64(v interface{}) (int64, error) {
 	switch val := v.(type) {
 	case int:
-		return strconv.Itoa(val)
+		return int64(val), nil
 	case int64:
-		return strconv.FormatInt(val, 10)
+		return val, nil
 	case float64:
-		return strconv.FormatFloat(val, 'f', -1, 64)
+		return int64(val), nil
 	case string:
-		return val
+		return strconv.ParseInt(val, 10, 64)
 	default:
-		return fmt.Sprintf("%v", val)
+		return 0, fmt.Errorf("cannot convert %T to int64", v)
 	}
 }
